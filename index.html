@@ -74,63 +74,104 @@
         })
     </script>
     <script>
-        const counterEl = document.querySelector('.js-app .counter');
-        const sumEl = document.querySelector('.js-app .sum');
-        const stepEl = document.querySelector('.js-app .step');
-        const counterButtonElMinus = document.querySelector('.js-app .math-counter .minus');
-        const counterButtonElPlus = document.querySelector('.js-app .math-counter .plus');
-        const stepButtonElMinus = document.querySelector('.js-app .math-step .minus');
-        const stepButtonElPlus = document.querySelector('.js-app .math-step .plus');
 
-        const data = {
-            counter: 1,
-            step: 2
-        };
+        class MicroVue {
 
-        const incrementCounterHandler = function (event) {
-            data.counter += 1;
-            counterEl.textContent = data.counter;
-        };
-        const decrementCounterHandler = function () {
-            data.counter -= 1;
-            counterEl.textContent = data.counter;
-        };
-        const incrementStepHandler = function () {
-            data.step += 2;
-            stepEl.textContent = data.step;
-        };
-        const decrementStepHandler = function () {
-            data.step -= 2;
-            stepEl.textContent = data.step;
-        };
+            constructor (params) {
+                this.el = params.el;
+                this.data = params.data;
+                this.computed = params.computed;
+                this.methods = params.methods;
 
-        const getSum = function () {
-            sumEl.textContent = data.counter + data.step;
-        };
+                this.domElems = params.domElems;
 
-        const queue = [getSum];
+                this.init();
 
-        Object.keys(data).forEach(key => {
-            let value = data[key]; // data.counter, data.counter1, data.counter2
-            Object.defineProperty(data, key, {
-                get: function () {
-                    queue.push();
-                    return value;
+            }
+            convertDataToReactive() {
+                Object.keys(this.data).forEach(key => {
+                    let value = this.data[key]; // data.counter, data.counter1, data.counter2
+                    Object.defineProperty(this.data, key, {
+                        get: function () {
+                            this.queue.push();
+                            return value;
+                        },
+                        set: function (newValue) {
+                            value = newValue;
+                            this.queue.forEach(fn => fn());
+                        }
+                    });
+                });
+            }
+
+            bindMethodsAndListeners(){
+
+            }
+            init(){
+                this.queue = [];
+                this.convertDataToReactive();
+                const queue = [getSum];
+                counterEl.textContent = data.counter;
+                stepEl.textContent = data.step;
+                getSum();
+                counterButtonElMinus.addEventListener('click', decrementCounterHandler);
+                counterButtonElPlus.addEventListener('click', incrementCounterHandler);
+                stepButtonElMinus.addEventListener('click', decrementStepHandler);
+                stepButtonElPlus.addEventListener('click', incrementStepHandler);
+
+                Object.keys(this.computed).forEach(key => {
+
+                });
+            }
+        }
+
+        // Client code
+        const mv = new MicroVue({
+            el: '.js-app',
+            data: {
+                counter: 1,
+                step: 2
+            },
+            methods: {
+                incrementCounterHandler(event) {
+                    data.counter += 1;
+                    counterEl.textContent = data.counter;
                 },
-                set: function (newValue) {
-                    value = newValue;
-                    queue.forEach(fn => fn());
+                decrementCounterHandler() {
+                    data.counter -= 1;
+                    counterEl.textContent = data.counter;
+                },
+                incrementStepHandler() {
+                    data.step += 2;
+                    stepEl.textContent = data.step;
+                },
+                decrementStepHandler() {
+                    data.step -= 2;
+                    stepEl.textContent = data.step;
                 }
-            });
+            },
+            computed: {
+                getSum() {
+                    sumEl.textContent = data.counter + data.step;
+                }
+            },
+            domElems: {
+                'counterEl': document.querySelector('.js-app .counter'),
+                'sumEl': document.querySelector('.js-app .sum'),
+                'stepEl': document.querySelector('.js-app .step'),
+                'counterButtonElMinus': document.querySelector('.js-app .math-counter .minus'),
+                'counterButtonElPlus': document.querySelector('.js-app .math-counter .plus'),
+                'stepButtonElMinus': document.querySelector('.js-app .math-step .minus'),
+                'stepButtonElPlus': document.querySelector('.js-app .math-step .plus')
+            }
+
         });
 
-        counterEl.textContent = data.counter;
-        stepEl.textContent = data.step;
-        getSum();
-        counterButtonElMinus.addEventListener('click', decrementCounterHandler);
-        counterButtonElPlus.addEventListener('click', incrementCounterHandler);
-        stepButtonElMinus.addEventListener('click', decrementStepHandler);
-        stepButtonElPlus.addEventListener('click', incrementStepHandler);
+
+
+
+
+
     </script>
 </body>
 
